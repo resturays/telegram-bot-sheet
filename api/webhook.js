@@ -15,7 +15,7 @@ export default async function handler(req, res) {
   const nominal = parts.pop();
   const pengeluaran = parts.join(" ");
 
-  await fetch(`https://api.telegram.org/bot${process.env.TOKEN}/sendMessage`, {
+  await fetch(`https://api.telegram.org/bot${process.env.8613120620:AAGHXv_ktZWIyquq5dqWeeWgzEUW0QC2Weo}/sendMessage`, {
     method: "POST",
     headers: {"Content-Type": "application/json"},
     body: JSON.stringify({
