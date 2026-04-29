@@ -49,7 +49,7 @@ export default async function handler(req, res) {
       requestBody: {
         values: [
           [
-            new Date().toISOString(),
+            new Date().toLocaleString("id-ID", {timeZone: "Asia/Jakarta"}),
             pengeluaran,
             Number(nominal)
           ]
