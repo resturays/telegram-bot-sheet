@@ -10,6 +10,7 @@ export default async function handler(req, res) {
 
     const message = body.message?.text;
     const chatId = body.message?.chat?.id;
+    const username = body.message?.from?.username || body.message?.from?.first_name;
 
     console.log("MESSAGE:", message);
 
@@ -44,16 +45,17 @@ export default async function handler(req, res) {
     // ⚠️ PASTIKAN NAMA SHEET BENAR
     await sheets.spreadsheets.values.append({
       spreadsheetId: process.env.SPREADSHEET_ID,
-      range: "Sheet1!A:C", // <-- ganti kalau nama sheet kamu beda
+      range: "Sheet1!A:D", // <-- ganti kalau nama sheet kamu beda
       valueInputOption: "RAW",
       requestBody: {
         values: [
           [
-            new Date().toLocaleString("id-ID", {timeZone: "Asia/Jakarta"}),
+            waktu,
+            username,
             pengeluaran,
             Number(nominal)
           ]
-        ],
+        ]
       },
     });
 
