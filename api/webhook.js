@@ -6,13 +6,17 @@ export default async function handler(req, res) {
   }
 
   try {
-    const body = req.body;
+  const body = req.body;
 
-    const message = body.message?.text;
-    const chatId = body.message?.chat?.id;
-    const username = body.message?.from?.username || body.message?.from?.first_name;
+  const msg = body.message || body.edited_message;
 
-    console.log("MESSAGE:", message);
+  const message = msg?.text;
+  const chatId = msg?.chat?.id;
+
+  const username = msg?.from?.username || msg?.from?.first_name;
+
+  console.log("MESSAGE:", message);
+  console.log("USER:", username);
 
     // skip kalau kosong atau command
     if (!message || message.startsWith("/")) {
