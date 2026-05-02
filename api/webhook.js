@@ -6,24 +6,25 @@ export default async function handler(req, res) {
   }
 
   try {
-  const body = req.body;
+    const body = req.body;
 
-  const msg = body.message || body.edited_message;
+    const msg = body.message || body.edited_message;
 
-  const message = msg?.text;
-  const chatId = msg?.chat?.id;
+    const message = msg?.text;
+    const chatId = msg?.chat?.id;
 
-  const username = msg?.from?.username || msg?.from?.first_name;
+    const username =
+      msg?.from?.username || msg?.from?.first_name || "unknown";
 
-  console.log("MESSAGE:", message);
-  console.log("USER:", username);
+    console.log("MESSAGE:", message);
+    console.log("USER:", username);
 
     // skip kalau kosong atau command
     if (!message || message.startsWith("/")) {
       return res.status(200).send("OK");
     }
 
-    // parsing
+    // parsing input
     const parts = message.trim().split(" ");
     const nominal = parts.pop();
     const pengeluaran = parts.join(" ");
@@ -34,6 +35,11 @@ export default async function handler(req, res) {
       await sendMessage(chatId, "Format salah. Contoh: makan 10000");
       return res.status(200).send("OK");
     }
+
+    // ✅ FIX WAKTU (WIB)
+    const waktu = new Date().toLocaleString("id-ID", {
+      timeZone: "Asia/Jakarta",
+    });
 
     console.log("MENULIS KE GOOGLE SHEETS...");
     console.log("SPREADSHEET_ID:", process.env.SPREADSHEET_ID);
@@ -46,27 +52,25 @@ export default async function handler(req, res) {
 
     const sheets = google.sheets({ version: "v4", auth });
 
-    // ⚠️ PASTIKAN NAMA SHEET BENAR
+    // ⚠️ Pastikan nama sheet sesuai
     await sheets.spreadsheets.values.append({
       spreadsheetId: process.env.SPREADSHEET_ID,
-      range: "Sheet1!A:D", // <-- ganti kalau nama sheet kamu beda
+      range: "Sheet1!A:D",
       valueInputOption: "RAW",
       requestBody: {
         values: [
-          [
-            waktu,
-            username,
-            pengeluaran,
-            Number(nominal)
-          ]
-        ]
+          [waktu, username, pengeluaran, Number(nominal)]
+        ],
       },
     });
 
     console.log("BERHASIL MENULIS");
 
-    // kirim balasan ke telegram
-    await sendMessage(chatId, `✅ Tersimpan: ${pengeluaran} - ${nominal}`);
+    // kirim balasan ke Telegram
+    await sendMessage(
+      chatId,
+      `✅ Tersimpan:\n👤 ${username}\n📝 ${pengeluaran}\n💰 ${nominal}`
+    );
 
     return res.status(200).send("OK");
 
@@ -77,14 +81,17 @@ export default async function handler(req, res) {
 }
 
 async function sendMessage(chatId, text) {
-  await fetch(`https://api.telegram.org/bot${process.env.TOKEN}/sendMessage`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      chat_id: chatId,
-      text: text,
-    }),
-  });
+  await fetch(
+    `https://api.telegram.org/bot${process.env.TOKEN}/sendMessage`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        chat_id: chatId,
+        text: text,
+      }),
+    }
+  );
 }
